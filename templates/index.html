@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstraDev Nexus AI Chatbot | Portfolio Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --purple: #6a1b9a;
+            --cyan: #00e5ff;
+            --dark: #0a0a1a;
+            --gradient: linear-gradient(135deg, var(--purple), var(--cyan));
+            --shadow-glow: 0 0 20px rgba(0,229,255,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark);
+            color: white;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        .header {
+            background: var(--gradient);
+            padding: 1rem 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-glow);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 900;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .chat-container {
+            max-width: 800px; margin: 2rem auto; padding: 0 1rem;
+        }
+        .chat-header {
+            text-align: center; margin-bottom: 2rem;
+            font-family: 'Orbitron', monospace;
+        }
+        .chat-header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem); margin-bottom: 0.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px var(--cyan)); }
+            to { filter: drop-shadow(0 0 20px var(--purple)); }
+        }
+        .chat-header p {
+            font-size: 1.1rem; opacity: 0.9; font-weight: 300;
+        }
+        #chat {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(0,229,255,0.2);
+            border-radius: 20px;
+            height: 500px;
+            overflow-y: auto;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-glow);
+            transition: all 0.3s ease;
+        }
+        #chat p {
+            margin-bottom: 1rem; padding: 0.8rem 1rem;
+            border-radius: 15px; max-width: 80%;
+            animation: slideIn 0.4s ease;
+        }
+        #chat p:nth-child(even) { background: rgba(106,27,154,0.3); margin-left: auto; text-align: right; }
+        #chat p:nth-child(odd) { background: rgba(0,229,255,0.15); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .input-group {
+            display: flex; gap: 1rem; align-items: center;
+        }
+        #msg {
+            flex: 1; padding: 1rem 1.5rem;
+            border: 2px solid rgba(0,229,255,0.3);
+            border-radius: 50px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        #msg::placeholder { color: rgba(255,255,255,0.6); }
+        #msg:focus {
+            outline: none;
+            border-color: var(--cyan);
+            box-shadow: var(--shadow-glow);
+        }
+        button {
+            padding: 1rem 2rem;
+            background: var(--gradient);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-glow);
+        }
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,229,255,0.4);
+        }
+        .footer {
+            text-align: center; padding: 2rem;
+            opacity: 0.8; font-size: 0.9rem;
+        }
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        .reveal.active {
+            opacity: 1; transform: translateY(0);
+        }
+        @media (max-width: 768px) {
+            .header { padding: 1rem; }
+            .chat-container { margin: 1rem; }
+            #chat { height: 400px; }
+        }
+    </style>
+</head>
+<body class="reveal">
+    <header class="header reveal">
+        <div class="logo">AstraDev Nexus</div>
+    </header>
+
+    <main class="chat-container">
+        <div class="chat-header reveal">
+            <h1>AI Chatbot Demo</h1>
+            <p>Smart Gemini-powered bot by Astra Nexus. Ask anything!</p>
+        </div>
+
+        <div id="chat">
+            <p><strong>🤖 Bot:</strong> Namaste! AstraDev Nexus AI bot ready. Ask any question—code, math, anime, news...</p>
+        </div>
+
+        <div class="input-group">
+            <input id="msg" type="text" placeholder="Type your question... (Enter to send)" autocomplete="off">
+            <button onclick="sendMsg()">Send</button>
+        </div>
+    </main>
+
+    <footer class="footer reveal">
+        <p>© 2026 AstraDev Nexus | Built by Astra Nexus, 7th Grader 🚀 | <a href="https://your-portfolio.netlify.app" style="color: var(--cyan);">Portfolio</a></p>
+    </footer>
+
+    <script>
+        const chat = document.getElementById('chat');
+        const msgInput = document.getElementById('msg');
+
+        // Enter key send
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMsg();
+        });
+
+        async function sendMsg() {
+            const msg = msgInput.value.trim();
+            if (!msg) return;
+
+            // User message
+            chat.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
+            msgInput.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            // Bot reply
+            const res = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ msg })
+            });
+            const data = await res.json();
+            chat.innerHTML += `<p><strong>🤖 Bot:</strong> ${data.reply}</p>`;
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Scroll reveals
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        });
+        reveals.forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
