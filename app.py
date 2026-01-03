@@ -15,7 +15,7 @@ def get_groq_reply(prompt):
         return None
     headers = {"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"}
     data = {
-        "model": "llama3.1-8b-instant",
+         "model": "llama-3.2-3b-preview",
         "messages": [{"role": "system", "content": "Astra Nexus, 7th grade dev India, AstraDev Nexus. Friendly expert short replies."}, {"role": "user", "content": prompt}],
         "max_tokens": 300, "temperature": 0.7
     }
