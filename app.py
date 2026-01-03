@@ -1,9 +1,8 @@
-from flask import Flask, render_template, request, jsonify, stream_with_context
-from chatbot import SmartPortfolioBot
-import json
+from flask import Flask, render_template, request, jsonify
+from chatbot import AstraDevBot  # New class name
 
 app = Flask(__name__)
-bot = SmartPortfolioBot()
+bot = AstraDevBot()
 
 @app.route("/")
 def home():
