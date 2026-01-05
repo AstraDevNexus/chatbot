@@ -138,9 +138,14 @@ def home():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    msg = (request.json or {}).get("msg", "").strip()
+    data = request.get_json(silent=True) or {}
+    msg = (data.get("message") or data.get("msg") or "").strip()  # <-- FIX
+
     if not msg:
         return jsonify({"reply": "Type a message."})
+
+    # ... keep the rest same ...
+
 
     # Weather handling (any location)
     if re.search(r"\bweather\b", msg, flags=re.I):
