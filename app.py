@@ -1,155 +1,64 @@
-import os
-import json
-import uuid
-import requests
-from datetime import datetime
-import pytz
-
 from flask import Flask, render_template, request, jsonify
-from firebase_admin import credentials, firestore, initialize_app
+import os
+import requests
+from groq import Groq
 
 app = Flask(__name__)
 
-# --------------------------------------------------
-# FIREBASE INITIALIZATION (ENV VAR BASED)
-# --------------------------------------------------
-firebase_json = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+# Groq Client
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-if not firebase_json:
-    raise RuntimeError("FIREBASE_SERVICE_ACCOUNT env variable not set")
+# ---------- ROUTES ----------
 
-cred = credentials.Certificate(json.loads(firebase_json))
-initialize_app(cred)
-db = firestore.client()
-
-# --------------------------------------------------
-# API KEYS
-# --------------------------------------------------
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
-
-# --------------------------------------------------
-# ROUTES
-# --------------------------------------------------
 @app.route("/")
-def index():
-    return render_template("index.html")
-
-@app.route("/login")
 def login():
     return render_template("login.html")
 
-# --------------------------------------------------
-# AI CHAT
-# --------------------------------------------------
-@app.route("/api/chat", methods=["POST"])
+@app.route("/chat")
 def chat():
-    data = request.json
-    messages = data.get("messages", [])
+    return render_template("index.html")
 
-    r = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {GROQ_API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "llama3-70b-8192",
-            "messages": messages
-        },
-        timeout=60
+# ---------- CHAT API ----------
+@app.route("/api/chat", methods=["POST"])
+def chat_api():
+    user_message = request.json.get("message", "")
+
+    completion = client.chat.completions.create(
+        model="llama-3.1-70b-versatile",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are Astra Nexus AI. "
+                    "Reply accurately, in clear bullet points when helpful, "
+                    "use markdown, code blocks, and structured formatting. "
+                    "Never say you lack real-time data unless explicitly required."
+                )
+            },
+            {"role": "user", "content": user_message}
+        ],
+        temperature=0.4,
+        max_tokens=1024
     )
 
-    r.raise_for_status()
-    reply = r.json()["choices"][0]["message"]["content"]
+    reply = completion.choices[0].message.content
 
     return jsonify({"reply": reply})
 
-# --------------------------------------------------
-# WEATHER + TIME
-# --------------------------------------------------
+# ---------- WEATHER API ----------
 @app.route("/api/weather")
 def weather():
-    city = request.args.get("city", "Delhi")
+    city = request.args.get("city")
+    api_key = os.environ.get("OPENWEATHER_API_KEY")
 
-    r = requests.get(
-        f"https://api.openweathermap.org/data/2.5/weather",
-        params={
-            "q": city,
-            "appid": OPENWEATHER_API_KEY,
-            "units": "metric"
-        },
-        timeout=20
+    url = (
+        "https://api.openweathermap.org/data/2.5/weather"
+        f"?q={city}&units=metric&appid={api_key}"
     )
 
-    r.raise_for_status()
-    data = r.json()
+    res = requests.get(url).json()
+    return jsonify(res)
 
-    tz = pytz.timezone("Asia/Kolkata")
-    local_time = datetime.now(tz).strftime("%I:%M %p")
-
-    return jsonify({
-        "city": city,
-        "temp": data["main"]["temp"],
-        "desc": data["weather"][0]["description"].title(),
-        "time": local_time
-    })
-
-# --------------------------------------------------
-# FIRESTORE CHAT HISTORY
-# --------------------------------------------------
-@app.route("/api/chats/<uid>")
-def get_chats(uid):
-    chats = []
-    for doc in db.collection("users").document(uid).collection("chats").stream():
-        chats.append({"id": doc.id, **doc.to_dict()})
-    return jsonify(chats)
-
-@app.route("/api/chat/new", methods=["POST"])
-def new_chat():
-    d = request.json
-    uid = d["uid"]
-    chat_id = str(uuid.uuid4())
-
-    db.collection("users").document(uid)\
-      .collection("chats").document(chat_id)\
-      .set({
-          "title": "New Chat",
-          "messages": [],
-          "createdAt": firestore.SERVER_TIMESTAMP
-      })
-
-    return jsonify({"chatId": chat_id})
-
-@app.route("/api/chat/save", methods=["POST"])
-def save_chat():
-    d = request.json
-    db.collection("users").document(d["uid"])\
-      .collection("chats").document(d["chatId"])\
-      .update({
-          "messages": d["messages"],
-          "updatedAt": firestore.SERVER_TIMESTAMP
-      })
-    return jsonify({"ok": True})
-
-@app.route("/api/chat/rename", methods=["POST"])
-def rename_chat():
-    d = request.json
-    db.collection("users").document(d["uid"])\
-      .collection("chats").document(d["chatId"])\
-      .update({"title": d["title"]})
-    return jsonify({"ok": True})
-
-@app.route("/api/chat/delete", methods=["POST"])
-def delete_chat():
-    d = request.json
-    db.collection("users").document(d["uid"])\
-      .collection("chats").document(d["chatId"])\
-      .delete()
-    return jsonify({"ok": True})
-
-# --------------------------------------------------
-# MAIN
-# --------------------------------------------------
+# ---------- RUN ----------
 if __name__ == "__main__":
     app.run(debug=True)

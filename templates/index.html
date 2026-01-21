@@ -1,49 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>AstraDev Nexus AI</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="/static/marked.min.js"></script>
-<script src="/static/app.js"></script>
-<script src="/static/theme.js"></script>
-<style>
-body {
-  margin:0;
-  font-family:Inter;
-  background:#0b1020;
-  color:white;
-}
-.sidebar {
-  width:260px;
-  background:#0f172a;
-  height:100vh;
-  position:fixed;
-}
-.chat {
-  margin-left:260px;
-  padding:20px;
-}
-.glow {
-  box-shadow:0 0 30px rgba(139,92,246,.3);
-}
-@media(max-width:768px){
-  .sidebar{display:none}
-  .chat{margin:0}
-}
-</style>
+  <title>Astra Nexus Chat</title>
+  <link rel="stylesheet" href="/static/css/main.css">
 </head>
+<body class="chat-page">
 
-<body>
-<div class="sidebar glow">
-  <button onclick="newChat()">➕ New Chat</button>
+<div class="sidebar">
+  <button class="new-chat">＋ New Chat</button>
   <div id="chatList"></div>
-  <button onclick="toggleTheme()">🌓</button>
+  <button onclick="toggleTheme()">🌙</button>
 </div>
 
-<div class="chat">
+<div class="chat-container">
   <div id="messages"></div>
-  <input id="input" placeholder="Message..." onkeydown="if(event.key==='Enter')send()">
+
+  <div class="input-box">
+    <input id="input" placeholder="Message Astra Nexus...">
+    <button onclick="send()">Send</button>
+  </div>
 </div>
+
+<script src="/static/js/app.js"></script>
+<script src="/static/js/theme.js"></script>
 </body>
 </html>
