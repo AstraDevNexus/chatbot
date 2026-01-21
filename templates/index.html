@@ -1,180 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
 <title>AstraDev Nexus AI</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
+<script src="/static/marked.min.js"></script>
+<script src="/static/app.js"></script>
+<script src="/static/theme.js"></script>
 <style>
-:root{
-  --bg:#020617;
-  --panel:#020617;
-  --bot:#0f172a;
-  --user:#4c1d95;
-  --accent:#22d3ee;
-}
-*{box-sizing:border-box}
-body{
+body {
   margin:0;
   font-family:Inter;
-  background:var(--bg);
-  color:#e5e7eb;
-  display:flex;
-  height:100vh;
-}
-
-/* SIDEBAR */
-.sidebar{
-  width:260px;
-  background:#020617;
-  border-right:1px solid #1e293b;
-  padding:16px;
-}
-.sidebar h3{margin:0 0 12px}
-
-/* CHAT */
-.chat{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
-.messages{
-  flex:1;
-  padding:20px;
-  overflow-y:auto;
-}
-.msg{
-  max-width:80%;
-  padding:14px;
-  border-radius:14px;
-  margin-bottom:14px;
-  animation:fadeUp .3s ease;
-}
-.user{
-  background:var(--user);
-  margin-left:auto;
-}
-.bot{
-  background:var(--bot);
-}
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(8px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-/* INPUT */
-.input-area{
-  display:flex;
-  padding:16px;
-  border-top:1px solid #1e293b;
-}
-.input-area input{
-  flex:1;
-  padding:14px;
-  background:#020617;
-  border:1px solid #1e293b;
-  border-radius:12px;
+  background:#0b1020;
   color:white;
-  outline:none;
 }
-.input-area button{
-  margin-left:12px;
-  padding:14px 20px;
-  border:none;
-  border-radius:12px;
-  font-weight:600;
-  cursor:pointer;
-  background:linear-gradient(135deg,#22d3ee,#38bdf8);
-  color:#020617;
+.sidebar {
+  width:260px;
+  background:#0f172a;
+  height:100vh;
+  position:fixed;
 }
-
-/* MOBILE */
+.chat {
+  margin-left:260px;
+  padding:20px;
+}
+.glow {
+  box-shadow:0 0 30px rgba(139,92,246,.3);
+}
 @media(max-width:768px){
   .sidebar{display:none}
-  .msg{max-width:90%}
+  .chat{margin:0}
 }
 </style>
 </head>
 
 <body>
-
-<div class="sidebar">
-  <h3>AstraDev Nexus</h3>
-  <p style="font-size:13px;opacity:.7">AI Chat Demo</p>
+<div class="sidebar glow">
+  <button onclick="newChat()">➕ New Chat</button>
+  <div id="chatList"></div>
+  <button onclick="toggleTheme()">🌓</button>
 </div>
 
 <div class="chat">
-  <div class="messages" id="messages"></div>
-
-  <div class="input-area">
-    <input id="input" placeholder="Ask anything…" />
-    <button onclick="sendMessage()">Send</button>
-  </div>
+  <div id="messages"></div>
+  <input id="input" placeholder="Message..." onkeydown="if(event.key==='Enter')send()">
 </div>
-
-<script>
-const input = document.getElementById("input");
-const messages = document.getElementById("messages");
-
-/* in-memory chat history */
-const history = [];
-
-/* ENTER KEY FIX */
-input.addEventListener("keydown", e=>{
-  if(e.key === "Enter") sendMessage();
-});
-
-/* SEND MESSAGE */
-async function sendMessage(){
-  const text = input.value.trim();
-  if(!text) return;
-
-  input.value = "";
-  addMessage(text,"user");
-  history.push({role:"user",content:text});
-
-  const typingBubble = addMessage("Typing…","bot");
-
-  try{
-    const res = await fetch("/api/chat",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({message:text})
-    });
-
-    const data = await res.json();
-    typeReply(typingBubble,data.reply);
-    history.push({role:"bot",content:data.reply});
-
-  }catch(err){
-    typingBubble.textContent = "⚠️ Server error. Try again.";
-  }
-}
-
-/* ADD MESSAGE */
-function addMessage(text,role){
-  const div = document.createElement("div");
-  div.className = `msg ${role}`;
-  div.textContent = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-  return div;
-}
-
-/* TYPING EFFECT */
-function typeReply(el,text){
-  el.textContent="";
-  let i=0;
-  const timer=setInterval(()=>{
-    el.textContent += text.charAt(i);
-    i++;
-    messages.scrollTop = messages.scrollHeight;
-    if(i>=text.length) clearInterval(timer);
-  },20);
-}
-</script>
-
 </body>
 </html>
