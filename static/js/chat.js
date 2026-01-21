@@ -1,46 +1,32 @@
-let currentChat = null;
+export function initChat() {
+  const input = document.querySelector("#prompt");
+  const sendBtn = document.querySelector("#sendBtn");
+  const messages = document.querySelector("#messages");
 
-function loadHistory() {
-  fetch("/history")
-    .then(r => r.json())
-    .then(chats => {
-      history.innerHTML = "";
-      chats.forEach(c => {
-        const div = document.createElement("div");
-        div.textContent = c.title;
-        div.onclick = () => currentChat = c.id;
-        history.appendChild(div);
-      });
-    });
+  sendBtn.onclick = () => {
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMsg(text, "user");
+    input.value = "";
+    fakeAI("Thinking...");
+  };
+
+  function addMsg(text, role) {
+    const div = document.createElement("div");
+    div.className = `msg ${role}`;
+    div.textContent = text;
+    messages.appendChild(div);
+  }
+
+  async function fakeAI(text) {
+    const div = document.createElement("div");
+    div.className = "msg ai";
+    messages.appendChild(div);
+
+    for (const ch of text) {
+      div.textContent += ch;
+      await new Promise(r => setTimeout(r, 25));
+    }
+  }
 }
-
-function newChat() {
-  fetch("/new-chat", { method: "POST" })
-    .then(r => r.json())
-    .then(d => {
-      currentChat = d.id;
-      messages.innerHTML = "";
-      loadHistory();
-    });
-}
-
-function send() {
-  if (!currentChat) return;
-  const text = msg.value;
-  messages.innerHTML += `<div class="msg">${text}</div>`;
-  msg.value = "";
-
-  fetch("/chat", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ id: currentChat, message: text })
-  })
-  .then(r => r.json())
-  .then(d => messages.innerHTML += `<div class="msg bot">${d.reply}</div>`);
-}
-
-function logout() {
-  location.href = "/logout";
-}
-
-loadHistory();
