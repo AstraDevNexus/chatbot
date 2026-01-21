@@ -1,14 +1,15 @@
+import os, json, requests
 from flask import Flask, render_template, request, jsonify
-import os
-import requests
-from groq import Groq
+import firebase_admin
+from firebase_admin import credentials
 
 app = Flask(__name__)
 
-# Groq Client
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+# Firebase init (safe via env)
+cred = credentials.Certificate(json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT"]))
+firebase_admin.initialize_app(cred)
 
-# ---------- ROUTES ----------
+GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 
 @app.route("/")
 def login():
@@ -18,47 +19,22 @@ def login():
 def chat():
     return render_template("index.html")
 
-# ---------- CHAT API ----------
 @app.route("/api/chat", methods=["POST"])
 def chat_api():
-    user_message = request.json.get("message", "")
+    prompt = request.json.get("message")
 
-    completion = client.chat.completions.create(
-        model="llama-3.1-70b-versatile",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are Astra Nexus AI. "
-                    "Reply accurately, in clear bullet points when helpful, "
-                    "use markdown, code blocks, and structured formatting. "
-                    "Never say you lack real-time data unless explicitly required."
-                )
-            },
-            {"role": "user", "content": user_message}
-        ],
-        temperature=0.4,
-        max_tokens=1024
+    r = requests.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "llama3-8b-8192",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.6
+        }
     )
 
-    reply = completion.choices[0].message.content
-
-    return jsonify({"reply": reply})
-
-# ---------- WEATHER API ----------
-@app.route("/api/weather")
-def weather():
-    city = request.args.get("city")
-    api_key = os.environ.get("OPENWEATHER_API_KEY")
-
-    url = (
-        "https://api.openweathermap.org/data/2.5/weather"
-        f"?q={city}&units=metric&appid={api_key}"
-    )
-
-    res = requests.get(url).json()
-    return jsonify(res)
-
-# ---------- RUN ----------
-if __name__ == "__main__":
-    app.run(debug=True)
+    data = r.json()
+    return jsonify({"reply": data["choices"][0]["message"]["content"]})

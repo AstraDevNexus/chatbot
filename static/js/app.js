@@ -1,40 +1,32 @@
+const send = document.getElementById("send");
+const input = document.getElementById("input");
 const messages = document.getElementById("messages");
 
-function add(text, cls){
-  const d = document.createElement("div");
-  d.className = "message " + cls;
-  d.innerText = text;
-  messages.appendChild(d);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-async function send(){
-  const input = document.getElementById("input");
+send.onclick = async () => {
   const text = input.value;
-  if(!text) return;
+  if (!text) return;
 
-  add(text, "user");
+  messages.innerHTML += `<div class="user">${text}</div>`;
   input.value = "";
 
-  const r = await fetch("/api/chat", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({message:text})
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({message: text})
   });
 
-  const data = await r.json();
-  typeEffect(data.reply);
-}
+  const data = await res.json();
+  typeText(data.reply);
+};
 
-function typeEffect(text){
+function typeText(text) {
   let i = 0;
-  const d = document.createElement("div");
-  d.className="message bot";
-  messages.appendChild(d);
+  const el = document.createElement("div");
+  el.className = "bot";
+  messages.appendChild(el);
 
-  const interval = setInterval(()=>{
-    d.innerText += text[i++];
-    if(i>=text.length) clearInterval(interval);
-    messages.scrollTop = messages.scrollHeight;
-  }, 15);
+  const interval = setInterval(() => {
+    el.textContent += text[i++];
+    if (i >= text.length) clearInterval(interval);
+  }, window.innerWidth < 600 ? 15 : 8);
 }

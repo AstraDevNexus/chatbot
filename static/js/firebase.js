@@ -5,44 +5,34 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const firebaseConfig = {
+const app = initializeApp({
   apiKey: "AIzaSyDMgUlLMjrMDXCXJTdUpGdqRfB1U_kQpqU",
   authDomain: "ai-login-4a340.firebaseapp.com",
-  projectId: "ai-login-4a340",
-};
+  projectId: "ai-login-4a340"
+});
 
-const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ---------- GOOGLE LOGIN ---------- */
-window.googleLogin = async () => {
-  try {
-    await signInWithPopup(auth, provider);
-    window.location.href = "/chat";
-  } catch (err) {
-    alert(err.message);
-  }
-};
+const isLogin = location.pathname === "/";
 
-/* ---------- EMAIL LOGIN ---------- */
-window.emailLogin = async () => {
-  const email = document.getElementById("email").value;
-  const pass = document.getElementById("password").value;
-
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-    window.location.href = "/chat";
-  } catch {
-    await createUserWithEmailAndPassword(auth, email, pass);
-    window.location.href = "/chat";
-  }
-};
-
-/* ---------- AUTO REDIRECT ---------- */
 onAuthStateChanged(auth, user => {
-  if (user) window.location.href = "/chat";
+  if (!user && !isLogin) location.href = "/";
+  if (user && isLogin) location.href = "/chat";
 });
+
+window.googleLogin = () => signInWithPopup(auth, provider);
+window.emailLogin = async () => {
+  const e = email.value, p = password.value;
+  try {
+    await signInWithEmailAndPassword(auth, e, p);
+  } catch {
+    await createUserWithEmailAndPassword(auth, e, p);
+  }
+};
+
+window.logout = () => signOut(auth);

@@ -1,34 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Astra Nexus Login</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/static/css/auth.css">
-<script type="module" src="/static/js/firebase.js"></script>
+  <title>Astra Nexus Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/css/main.css">
+  <script type="module" src="/static/js/firebase.js"></script>
 </head>
+<body class="auth">
 
-<body>
-<div class="bg-glow"></div>
+<div class="glow-bg"></div>
 
 <div class="login-card">
   <h1>Astra<span>Nexus</span></h1>
-  <p class="subtitle">AI Interface • Premium Access</p>
-
-  <input id="email" type="email" placeholder="Email">
+  <input id="email" placeholder="Email">
   <input id="password" type="password" placeholder="Password">
-
-  <button class="btn primary" onclick="emailLogin()">
-    Continue
-  </button>
-
-  <div class="divider">OR</div>
-
-  <button class="btn google" onclick="googleLogin()">
-    Continue with Google
-  </button>
-
-  <footer>Secure • Fast • Private</footer>
+  <button onclick="emailLogin()">Continue</button>
+  <button class="google" onclick="googleLogin()">Google Login</button>
 </div>
+
 </body>
 </html>
