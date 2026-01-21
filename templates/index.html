@@ -1,107 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AstraDev Nexus</title>
-<script src="/static/marked.min.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AstraDev Nexus AI</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+
 <style>
-body{
-  margin:0;
-  background:#020617;
-  color:#e5e7eb;
-  font-family:Inter;
-  display:flex;
-  height:100vh;
+:root{
+  --bg:#070b18;
+  --card:#0e152b;
+  --accent:#8b5cf6;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+}
+*{box-sizing:border-box;font-family:Inter}
+body{margin:0;background:radial-gradient(circle at top,#1e1b4b,var(--bg));color:var(--text);height:100vh}
+
+/* LOGIN */
+#loginScreen{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#020617,#1e1b4b);
+  z-index:999;
+}
+.login-card{
+  width:100%;max-width:420px;padding:32px;
+  background:rgba(15,23,42,.9);
+  border-radius:16px;
+  box-shadow:0 0 40px rgba(139,92,246,.4);
+}
+.login-card h1{margin-bottom:8px}
+.login-card p{color:var(--muted)}
+.login-card button,input{
+  width:100%;padding:12px;margin-top:12px;border-radius:10px;
+  border:none;background:#111827;color:white
+}
+.login-card button{background:linear-gradient(135deg,#8b5cf6,#ec4899);cursor:pointer}
+
+/* APP */
+#app{display:none;height:100vh}
+.sidebar{
+  width:260px;background:#020617;padding:16px;display:flex;flex-direction:column
+}
+.chat-list{flex:1;overflow:auto}
+.chat-list div{padding:10px;border-radius:8px;color:var(--muted);cursor:pointer}
+.chat-list div:hover{background:#111827}
+.logout{margin-top:12px}
+
+.main{
+  flex:1;display:flex;flex-direction:column
+}
+.header{
+  padding:16px;border-bottom:1px solid #1f2937
 }
 .chat{
-  flex:1;
-  display:flex;
-  flex-direction:column;
+  flex:1;padding:24px;overflow:auto
 }
-#messages{
-  flex:1;
-  overflow:auto;
-  padding:20px;
+.message{
+  max-width:70%;padding:14px;border-radius:14px;margin-bottom:16px
 }
-.msg{margin-bottom:16px}
-.user{color:#22d3ee}
-.bot{background:#0f172a;padding:14px;border-radius:12px}
+.user{margin-left:auto;background:#4c1d95}
+.bot{background:#111827}
 .input{
-  display:flex;
-  padding:12px;
-  border-top:1px solid #1e293b;
+  display:flex;padding:16px;border-top:1px solid #1f2937
 }
-input{
-  flex:1;
-  padding:12px;
-  background:#020617;
-  color:#fff;
-  border:none;
-  border-radius:10px;
-}
-button{
-  margin-left:8px;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#22d3ee;
-}
-pre{background:#020617;padding:12px;border-radius:10px}
-@media(max-width:600px){
-  #messages{padding:12px}
+input{flex:1;margin:0}
+.send{margin-left:10px;background:var(--accent)}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .message{max-width:100%}
 }
 </style>
 </head>
+
 <body>
 
-<div class="chat">
-  <div id="messages">
-    <div class="bot">Namaste! Ask anything 🚀</div>
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>AstraDev Nexus</h1>
+    <p>Sign in to continue</p>
+    <input id="email" placeholder="Email"/>
+    <input id="password" type="password" placeholder="Password"/>
+    <button onclick="emailLogin()">Login with Email</button>
+    <button onclick="googleLogin()">Continue with Google</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:flex">
+  <div class="sidebar">
+    <h3>Chats</h3>
+    <div class="chat-list" id="chatList"></div>
+    <button class="logout" onclick="logout()">Logout</button>
   </div>
 
-  <div class="input">
-    <input id="text" placeholder="Type and press Enter">
-    <button onclick="send()">Send</button>
+  <div class="main">
+    <div class="header">AstraDev Nexus AI</div>
+    <div class="chat" id="chat"></div>
+    <div class="input">
+      <input id="prompt" placeholder="Ask something..."/>
+      <button class="send" onclick="send()">Send</button>
+    </div>
   </div>
 </div>
 
 <script>
-const box = document.getElementById("messages");
-const input = document.getElementById("text");
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyDMgUlLMjrMDXCXJTdUpGdqRfB1U_kQpqU",
+  authDomain: "ai-login-4a340.firebaseapp.com",
+  projectId: "ai-login-4a340"
+};
 
-function typeText(el, text){
-  let i=0;
-  const t = setInterval(()=>{
-    el.innerHTML = marked.parse(text.slice(0,i++));
-    box.scrollTop = box.scrollHeight;
-    if(i>text.length) clearInterval(t);
-  }, 12);
-}
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-async function send(){
-  const msg = input.value.trim();
-  if(!msg) return;
-  input.value="";
-
-  box.innerHTML += `<div class="msg user">${msg}</div>`;
-  const bot = document.createElement("div");
-  bot.className="msg bot";
-  box.appendChild(bot);
-
-  const r = await fetch("/api/chat",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({message:msg})
-  });
-
-  const data = await r.json();
-  typeText(bot, data.reply);
-}
-
-input.addEventListener("keydown",e=>{
-  if(e.key==="Enter") send();
+/* AUTH */
+auth.onAuthStateChanged(user=>{
+  if(user){
+    loginScreen.style.display="none";
+    app.style.display="flex";
+  }else{
+    loginScreen.style.display="flex";
+    app.style.display="none";
+  }
 });
-</script>
 
+function googleLogin(){
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+}
+function emailLogin(){
+  auth.signInWithEmailAndPassword(email.value,password.value);
+}
+function logout(){auth.signOut()}
+
+/* CHAT */
+async function send(){
+  const text = prompt.value;
+  prompt.value="";
+  addMessage(text,"user");
+
+  const res = await fetch("/api/chat",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:text})
+  });
+  const data = await res.json();
+  typeMessage(data.reply);
+}
+
+function addMessage(text,cls){
+  const d=document.createElement("div");
+  d.className="message "+cls;
+  d.innerText=text;
+  chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function typeMessage(text){
+  const d=document.createElement("div");
+  d.className="message bot";
+  chat.appendChild(d);
+  let i=0;
+  const interval=setInterval(()=>{
+    d.innerHTML+=text[i++];
+    chat.scrollTop=chat.scrollHeight;
+    if(i>=text.length)clearInterval(interval);
+  },20);
+}
+</script>
 </body>
 </html>
