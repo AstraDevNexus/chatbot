@@ -1,77 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Astra Nexus • Chat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <style>
-    body {
-      margin: 0;
-      background: #020617;
-      color: white;
-      font-family: system-ui, sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-
-    header {
-      padding: 14px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    #chat {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-    }
-
-    .user { text-align: right; margin: 10px 0; }
-    .bot { text-align: left; margin: 10px 0; opacity: 0.9; }
-
-    footer {
-      display: flex;
-      padding: 12px;
-      gap: 8px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-
-    input {
-      flex: 1;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-    }
-
-    button {
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      background: #6366f1;
-      color: white;
-    }
-  </style>
+  <title>AstraDev Nexus</title>
+  <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
 
-<header>
-  <strong>AstraDev Nexus</strong>
-  <button onclick="logout()">Logout</button>
-</header>
+<div class="sidebar">
+  <button id="newChat">+ New Chat</button>
+  <div id="chatList"></div>
+</div>
 
-<div id="chat"></div>
+<div class="main">
+  <div class="top">
+    <span>AstraDev Nexus</span>
+    <button id="logout">Logout</button>
+  </div>
 
-<footer>
-  <input id="message" placeholder="Type a message…" />
-  <button onclick="sendMessage()">Send</button>
-</footer>
+  <div id="messages"></div>
 
-<script type="module" src="/static/js/auth.js"></script>
-<script src="/static/js/chat.js"></script>
+  <div class="input">
+    <input id="msg" placeholder="Message..." />
+    <button id="send">Send</button>
+  </div>
+</div>
+
+<script type="module" src="/static/js/firebase.js"></script>
+<script type="module" src="/static/js/chat.js"></script>
+<script src="/static/js/theme.js"></script>
 </body>
 </html>
