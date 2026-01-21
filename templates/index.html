@@ -1,293 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AstraDev Nexus AI</title>
 
-<!-- FONT -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-<!-- MARKDOWN -->
-<script src="/static/marked.min.js"></script>
-
-<!-- FIREBASE v8 (IMPORTANT: DO NOT CHANGE VERSION) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <style>
 :root{
   --bg:#020617;
-  --panel:#0f172a;
-  --accent:#8b5cf6;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
+  --panel:#020617;
+  --bot:#0f172a;
+  --user:#4c1d95;
+  --accent:#22d3ee;
 }
-
-*{box-sizing:border-box;font-family:Inter}
+*{box-sizing:border-box}
 body{
   margin:0;
-  background:radial-gradient(circle at top,#1e1b4b,var(--bg));
-  color:var(--text);
+  font-family:Inter;
+  background:var(--bg);
+  color:#e5e7eb;
+  display:flex;
   height:100vh;
-  overflow:hidden;
 }
 
-/* LOGIN */
-#login{
-  position:fixed;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#020617,#1e1b4b);
-  z-index:10;
-}
-.login-card{
-  background:rgba(15,23,42,.95);
-  padding:32px;
-  border-radius:16px;
-  width:100%;
-  max-width:420px;
-  box-shadow:0 0 50px rgba(139,92,246,.4);
-}
-.login-card h1{margin:0 0 6px}
-.login-card p{color:var(--muted);margin-bottom:20px}
-.login-card button,input{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
-  border:none;
-}
-.login-card input{background:#020617;color:white}
-.login-card button{
-  background:linear-gradient(135deg,var(--accent),#ec4899);
-  color:white;
-  cursor:pointer;
-}
-
-/* APP */
-#app{display:none;height:100vh}
-
+/* SIDEBAR */
 .sidebar{
   width:260px;
   background:#020617;
+  border-right:1px solid #1e293b;
   padding:16px;
-  display:flex;
-  flex-direction:column;
 }
-.sidebar h3{margin-top:0}
-.chat-list{flex:1;overflow:auto}
-.chat-list div{
-  padding:10px;
-  border-radius:8px;
-  color:var(--muted);
-}
-.chat-list div:hover{background:#111827}
-.logout{margin-top:12px}
+.sidebar h3{margin:0 0 12px}
 
-/* MOBILE */
-.mobile-btn{
-  display:none;
-  position:absolute;
-  top:12px;left:12px;
-  font-size:22px;
-  background:none;
-  border:none;
-  color:white;
-}
-
-.main{
+/* CHAT */
+.chat{
   flex:1;
   display:flex;
   flex-direction:column;
 }
-
-.header{
-  padding:16px;
-  border-bottom:1px solid #1f2937;
-}
-
 .messages{
   flex:1;
-  overflow:auto;
-  padding:24px;
+  padding:20px;
+  overflow-y:auto;
 }
-
 .msg{
-  max-width:70%;
+  max-width:80%;
   padding:14px;
   border-radius:14px;
   margin-bottom:14px;
-  animation:fade .2s ease;
+  animation:fadeUp .3s ease;
 }
-.user{margin-left:auto;background:#4c1d95}
-.bot{background:#111827}
+.user{
+  background:var(--user);
+  margin-left:auto;
+}
+.bot{
+  background:var(--bot);
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
 
-.input{
+/* INPUT */
+.input-area{
   display:flex;
   padding:16px;
-  border-top:1px solid #1f2937;
+  border-top:1px solid #1e293b;
 }
-.input input{
+.input-area input{
   flex:1;
-  padding:12px;
-  border-radius:10px;
-  border:none;
+  padding:14px;
   background:#020617;
+  border:1px solid #1e293b;
+  border-radius:12px;
   color:white;
+  outline:none;
 }
-.send{
-  margin-left:10px;
-  padding:12px 18px;
-  border-radius:10px;
+.input-area button{
+  margin-left:12px;
+  padding:14px 20px;
   border:none;
-  background:var(--accent);
-  color:white;
+  border-radius:12px;
+  font-weight:600;
   cursor:pointer;
+  background:linear-gradient(135deg,#22d3ee,#38bdf8);
+  color:#020617;
 }
 
-@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
-
+/* MOBILE */
 @media(max-width:768px){
-  .sidebar{
-    position:fixed;
-    left:-100%;
-    top:0;
-    height:100%;
-    transition:.3s;
-    z-index:5;
-  }
-  .sidebar.open{left:0}
-  .mobile-btn{display:block}
-  .msg{max-width:100%}
+  .sidebar{display:none}
+  .msg{max-width:90%}
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN SCREEN -->
-<div id="login">
-  <div class="login-card">
-    <h1>AstraDev Nexus</h1>
-    <p>Sign in to continue</p>
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="emailLogin()">Login with Email</button>
-    <button onclick="googleLogin()">Continue with Google</button>
-  </div>
+<div class="sidebar">
+  <h3>AstraDev Nexus</h3>
+  <p style="font-size:13px;opacity:.7">AI Chat Demo</p>
 </div>
 
-<!-- APP -->
-<div id="app" style="display:flex">
-  <button class="mobile-btn" onclick="toggleSidebar()">☰</button>
+<div class="chat">
+  <div class="messages" id="messages"></div>
 
-  <div class="sidebar" id="sidebar">
-    <h3>Chat History</h3>
-    <div class="chat-list"></div>
-    <button class="logout" onclick="logout()">Logout</button>
-  </div>
-
-  <div class="main">
-    <div class="header">AstraDev Nexus AI</div>
-    <div class="messages" id="messages"></div>
-    <div class="input">
-      <input id="prompt" placeholder="Ask something..." onkeydown="if(event.key==='Enter')send()">
-      <button class="send" onclick="send()">Send</button>
-    </div>
+  <div class="input-area">
+    <input id="input" placeholder="Ask anything…" />
+    <button onclick="sendMessage()">Send</button>
   </div>
 </div>
 
 <script>
-/* FIREBASE CONFIG (SAFE TO EXPOSE) */
-firebase.initializeApp({
-  apiKey: "AIzaSyDMgUlLMjrMDXCXJTdUpGdqRfB1U_kQpqU",
-  authDomain: "ai-login-4a340.firebaseapp.com",
-  projectId: "ai-login-4a340"
+const input = document.getElementById("input");
+const messages = document.getElementById("messages");
+
+/* in-memory chat history */
+const history = [];
+
+/* ENTER KEY FIX */
+input.addEventListener("keydown", e=>{
+  if(e.key === "Enter") sendMessage();
 });
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-let uid=null;
+/* SEND MESSAGE */
+async function sendMessage(){
+  const text = input.value.trim();
+  if(!text) return;
 
-/* AUTH */
-auth.onAuthStateChanged(user=>{
-  if(user){
-    uid=user.uid;
-    login.style.display="none";
-    app.style.display="flex";
-    loadHistory();
-  }else{
-    login.style.display="flex";
-    app.style.display="none";
-  }
-});
+  input.value = "";
+  addMessage(text,"user");
+  history.push({role:"user",content:text});
 
-function googleLogin(){
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-}
-function emailLogin(){
-  auth.signInWithEmailAndPassword(email.value,password.value);
-}
-function logout(){auth.signOut()}
+  const typingBubble = addMessage("Typing…","bot");
 
-/* CHAT */
-async function send(){
-  const text=prompt.value.trim();
-  if(!text)return;
-  prompt.value="";
-  add(text,"user");
-
-  await db.collection("messages").add({uid,text,role:"user",t:Date.now()});
-
-  const r=await fetch("/api/chat",{
-    method:"POST",
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({message:text})
-  });
-  const data=await r.json();
-  type(data.reply);
-
-  await db.collection("messages").add({uid,text:data.reply,role:"bot",t:Date.now()});
-}
-
-function add(text,cls){
-  const d=document.createElement("div");
-  d.className="msg "+cls;
-  d.innerHTML=marked.parse(text);
-  messages.appendChild(d);
-  messages.scrollTop=messages.scrollHeight;
-}
-
-function type(text){
-  const d=document.createElement("div");
-  d.className="msg bot";
-  messages.appendChild(d);
-  let i=0;
-  const t=setInterval(()=>{
-    d.innerHTML=marked.parse(text.slice(0,i++));
-    messages.scrollTop=messages.scrollHeight;
-    if(i>text.length)clearInterval(t);
-  },20);
-}
-
-/* HISTORY */
-function loadHistory(){
-  db.collection("messages")
-    .where("uid","==",uid)
-    .orderBy("t")
-    .onSnapshot(s=>{
-      messages.innerHTML="";
-      s.forEach(doc=>{
-        const m=doc.data();
-        add(m.text,m.role);
-      });
+  try{
+    const res = await fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({message:text})
     });
+
+    const data = await res.json();
+    typeReply(typingBubble,data.reply);
+    history.push({role:"bot",content:data.reply});
+
+  }catch(err){
+    typingBubble.textContent = "⚠️ Server error. Try again.";
+  }
 }
 
-/* UI */
-function toggleSidebar(){
-  sidebar.classList.toggle("open");
+/* ADD MESSAGE */
+function addMessage(text,role){
+  const div = document.createElement("div");
+  div.className = `msg ${role}`;
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div;
+}
+
+/* TYPING EFFECT */
+function typeReply(el,text){
+  el.textContent="";
+  let i=0;
+  const timer=setInterval(()=>{
+    el.textContent += text.charAt(i);
+    i++;
+    messages.scrollTop = messages.scrollHeight;
+    if(i>=text.length) clearInterval(timer);
+  },20);
 }
 </script>
 
