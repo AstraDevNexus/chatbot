@@ -1,26 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Astra Nexus Chat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/css/main.css">
-  <script type="module" src="/static/js/firebase.js"></script>
-  <script defer src="/static/js/app.js"></script>
+  <meta charset="UTF-8" />
+  <title>Astra Nexus • Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      margin: 0;
+      background: #020617;
+      color: white;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    #chat {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .user { text-align: right; margin: 10px 0; }
+    .bot { text-align: left; margin: 10px 0; opacity: 0.9; }
+
+    footer {
+      display: flex;
+      padding: 12px;
+      gap: 8px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    button {
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: #6366f1;
+      color: white;
+    }
+  </style>
 </head>
-<body class="chat">
+<body>
 
-<div class="sidebar">
-  <button id="newChat">＋ New Chat</button>
-  <button id="logout">Logout</button>
-</div>
+<header>
+  <strong>AstraDev Nexus</strong>
+  <button onclick="logout()">Logout</button>
+</header>
 
-<div class="chat-area">
-  <div id="messages"></div>
-  <div class="input-bar">
-    <input id="input" placeholder="Message Astra Nexus…">
-    <button id="send">Send</button>
-  </div>
-</div>
+<div id="chat"></div>
 
+<footer>
+  <input id="message" placeholder="Type a message…" />
+  <button onclick="sendMessage()">Send</button>
+</footer>
+
+<script type="module" src="/static/js/auth.js"></script>
+<script src="/static/js/chat.js"></script>
 </body>
 </html>

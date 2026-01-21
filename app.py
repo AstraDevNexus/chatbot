@@ -1,40 +1,56 @@
-import os, json, requests
 from flask import Flask, render_template, request, jsonify
-import firebase_admin
-from firebase_admin import credentials
+import os
+import requests
 
 app = Flask(__name__)
 
-# Firebase init (safe via env)
-cred = credentials.Certificate(json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT"]))
-firebase_admin.initialize_app(cred)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_MODEL = "llama-3.1-8b-instant"
 
-GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 
 @app.route("/")
 def login():
     return render_template("login.html")
 
+
 @app.route("/chat")
 def chat():
     return render_template("index.html")
 
+
 @app.route("/api/chat", methods=["POST"])
-def chat_api():
-    prompt = request.json.get("message")
+def api_chat():
+    data = request.get_json()
+    message = data.get("message", "").strip()
+
+    if not message:
+        return jsonify({"reply": "Please type something."})
+
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": GROQ_MODEL,
+        "messages": [
+            {"role": "system", "content": "Reply like ChatGPT. Use bullet points and code blocks when helpful."},
+            {"role": "user", "content": message}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 400
+    }
 
     r = requests.post(
         "https://api.groq.com/openai/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {GROQ_API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "llama3-8b-8192",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.6
-        }
+        headers=headers,
+        json=payload,
+        timeout=20
     )
 
-    data = r.json()
-    return jsonify({"reply": data["choices"][0]["message"]["content"]})
+    reply = r.json()["choices"][0]["message"]["content"]
+    return jsonify({"reply": reply})
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
