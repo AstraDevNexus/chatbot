@@ -2,32 +2,71 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Astra Nexus</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Main Styles -->
   <link rel="stylesheet" href="/static/css/main.css" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
+
+  <!-- PARTICLE BACKGROUND -->
   <canvas id="particles"></canvas>
 
-  <div class="chat-body">
+  <!-- APP CONTAINER -->
+  <div id="app">
+
+    <!-- SIDEBAR -->
     <aside class="sidebar">
-      <h2>Astra Nexus</h2>
-      <button id="newChatBtn">+ New Chat</button>
-      <div id="chatList"></div>
-      <button id="logoutBtn">Logout</button>
+      <div class="brand">Astra Nexus</div>
+
+      <button id="newChatBtn" class="btn primary">
+        + New Chat
+      </button>
+
+      <div id="chatList" class="chat-list">
+        <!-- Firestore chat titles go here -->
+      </div>
+
+      <button id="logoutBtn" class="btn danger">
+        Logout
+      </button>
     </aside>
 
-    <section class="chat">
-      <div id="messages"></div>
-      <div class="input-box">
-        <input id="prompt" placeholder="Message Astra AI…" />
-        <button id="sendBtn">▶</button>
-      </div>
-    </section>
+    <!-- MAIN CHAT AREA -->
+    <main class="chat-container">
+
+      <!-- CHAT MESSAGES -->
+      <section id="chatMessages" class="chat-messages">
+        <div class="system-message">
+          👋 Hello! Ask me anything — weather, code, ideas, or chat.
+        </div>
+      </section>
+
+      <!-- INPUT BAR -->
+      <footer class="chat-input-bar">
+        <input
+          id="chatInput"
+          type="text"
+          placeholder="Message Astra AI..."
+          autocomplete="off"
+        />
+        <button id="sendBtn" class="send-btn">
+          ▶
+        </button>
+      </footer>
+
+    </main>
   </div>
 
-  <!-- ONLY ONE SCRIPT -->
+  <!-- ENTRY POINT (IMPORTANT) -->
   <script type="module" src="/static/js/main.js"></script>
+
 </body>
 </html>

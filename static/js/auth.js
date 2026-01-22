@@ -1,22 +1,67 @@
-// static/js/auth.js
-import { auth } from "./firebase.js";
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+// --------------------
+// AUTH GUARD
+// --------------------
+auth.onAuthStateChanged(user => {
+  const isLoginPage = window.location.pathname.includes("login");
 
-export function initAuth() {
-  const email = document.querySelector("#email");
-  const password = document.querySelector("#password");
+  if (!user && !isLoginPage) {
+    window.location.replace("/login");
+  }
 
-  document.querySelector("#loginBtn").onclick = () =>
-    signInWithEmailAndPassword(auth, email.value, password.value);
+  if (user && isLoginPage) {
+    window.location.replace("/");
+  }
+});
 
-  document.querySelector("#signupBtn").onclick = () =>
-    createUserWithEmailAndPassword(auth, email.value, password.value);
+// --------------------
+// EMAIL LOGIN
+// --------------------
+function emailLogin() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-  document.querySelector("#googleBtn").onclick = () =>
-    signInWithPopup(auth, new GoogleAuthProvider());
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => window.location.replace("/"))
+    .catch(err => showAuthError(err.message));
+}
+
+// --------------------
+// EMAIL SIGNUP
+// --------------------
+function emailSignup() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => window.location.replace("/"))
+    .catch(err => showAuthError(err.message));
+}
+
+// --------------------
+// GOOGLE LOGIN
+// --------------------
+function googleLogin() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .then(() => window.location.replace("/"))
+    .catch(err => showAuthError(err.message));
+}
+
+// --------------------
+// LOGOUT
+// --------------------
+function logout() {
+  auth.signOut().then(() => {
+    window.location.replace("/login");
+  });
+}
+
+// --------------------
+// ERROR DISPLAY
+// --------------------
+function showAuthError(msg) {
+  const el = document.getElementById("authError");
+  if (!el) return;
+  el.innerText = msg;
+  el.style.opacity = 1;
 }

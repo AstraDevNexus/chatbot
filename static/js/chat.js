@@ -1,65 +1,58 @@
-export function initChat() {
-  const input = document.getElementById("prompt");
-  const sendBtn = document.getElementById("sendBtn");
-  const messages = document.getElementById("messages");
-  const newChatBtn = document.getElementById("newChatBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
+const chatContainer = document.getElementById("chatMessages");
+const input = document.getElementById("chatInput");
 
-  if (!input || !sendBtn || !messages) {
-    console.error("Chat elements missing");
-    return;
-  }
+// --------------------
+// SEND MESSAGE
+// --------------------
+function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
 
-  // SEND MESSAGE
-  sendBtn.addEventListener("click", sendMessage);
-  input.addEventListener("keydown", e => {
-    if (e.key === "Enter") sendMessage();
-  });
+  addMessage(text, "user");
+  input.value = "";
 
-  function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
-
-    addMsg(text, "user");
-    input.value = "";
-
-    fakeAIResponse();
-  }
-
-  // NEW CHAT
-  newChatBtn?.addEventListener("click", () => {
-    messages.innerHTML = "";
-    addMsg("👋 New chat started. Ask me anything.", "ai");
-  });
-
-  // LOGOUT
-  logoutBtn?.addEventListener("click", async () => {
-    await auth.signOut();
-    window.location.href = "/login";
-  });
-
-  function addMsg(text, role) {
-    const div = document.createElement("div");
-    div.className = `msg ${role}`;
-    div.textContent = text;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-  }
-
-  function fakeAIResponse() {
-    const div = document.createElement("div");
-    div.className = "msg ai";
-    messages.appendChild(div);
-
-    const text = "🤖 Astra AI is connected. API integration pending.";
-    let i = 0;
-
-    const interval = setInterval(() => {
-      div.textContent += text[i++];
-      if (i >= text.length) clearInterval(interval);
-    }, 20);
-  }
-
-  // Welcome message
-  addMsg("👋 Hello! Ask me anything — weather, code, ideas, or chat.", "ai");
+  fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: text })
+  })
+    .then(res => res.json())
+    .then(data => {
+      addMessage(data.reply, "ai");
+    })
+    .catch(() => {
+      addMessage("⚠️ AI service unavailable.", "ai");
+    });
 }
+
+// --------------------
+// ADD MESSAGE
+// --------------------
+function addMessage(text, sender) {
+  const bubble = document.createElement("div");
+  bubble.className = `bubble ${sender}`;
+  bubble.innerText = text;
+
+  chatContainer.appendChild(bubble);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+
+  bubble.animate(
+    [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "translateY(0)" }],
+    { duration: 180, easing: "ease-out" }
+  );
+}
+
+// --------------------
+// NEW CHAT
+// --------------------
+function newChat() {
+  chatContainer.innerHTML = "";
+  addMessage("👋 Hello! Ask me anything.", "ai");
+}
+
+// --------------------
+// ENTER TO SEND
+// --------------------
+input?.addEventListener("keydown", e => {
+  if (e.key === "Enter") sendMessage();
+});
