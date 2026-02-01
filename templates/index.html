@@ -2,71 +2,334 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Astra Nexus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AstraDev Nexus • AI Chatbot</title>
 
-  <!-- Main Styles -->
-  <link rel="stylesheet" href="/static/css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg0:#070812;
+      --bg1:#0b1030;
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(0,229,255,.22);
+      --purple:#7c3aed;
+      --cyan:#22d3ee;
+      --text:#e8eefc;
+      --muted:rgba(232,238,252,.72);
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --glow: 0 0 28px rgba(34,211,238,.22);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 20% 10%, rgba(124,58,237,.25), transparent 55%),
+        radial-gradient(900px 600px at 80% 0%, rgba(34,211,238,.18), transparent 55%),
+        radial-gradient(1000px 700px at 50% 100%, rgba(34,211,238,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(7,8,18,.72);
+      backdrop-filter: blur(14px);
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+    .topbar-inner{
+      max-width:980px; margin:0 auto;
+      padding:14px 18px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      text-decoration:none; color:var(--text);
+    }
+    .logo{
+      width:40px; height:40px; border-radius:12px;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      box-shadow: var(--glow);
+    }
+    .brand-title{
+      font-family:Orbitron,monospace;
+      font-weight:900;
+      letter-spacing:.6px;
+      font-size:14px;
+      line-height:1.1;
+    }
+    .brand-sub{
+      font-size:12px; color:var(--muted);
+      margin-top:3px;
+    }
+
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding:22px 18px 34px;
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:18px;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+      border-radius:18px;
+      overflow:hidden;
+    }
+
+    .hero{
+      padding:18px 18px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:14px;
+    }
+    .hero h1{
+      margin:0;
+      font-family:Orbitron,monospace;
+      font-size:20px;
+      letter-spacing:.4px;
+      background: linear-gradient(135deg, #fff, rgba(34,211,238,.95));
+      -webkit-background-clip:text; background-clip:text;
+      color:transparent;
+    }
+    .hero p{margin:6px 0 0; color:var(--muted); font-size:13px}
+
+    .badge{
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      color:rgba(255,255,255,.9);
+      background:linear-gradient(135deg, rgba(124,58,237,.35), rgba(34,211,238,.18));
+      border:1px solid rgba(34,211,238,.22);
+      box-shadow: var(--glow);
+      white-space:nowrap;
+    }
+
+    #chat{
+      height:520px;
+      overflow:auto;
+      padding:14px;
+      scroll-behavior:smooth;
+    }
+
+    .msg{
+      display:flex;
+      margin:10px 0;
+      gap:10px;
+    }
+    .msg.you{justify-content:flex-end}
+    .bubble{
+      max-width:min(720px, 90%);
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.09);
+      line-height:1.45;
+      font-size:14px;
+      white-space:pre-wrap;  /* keeps AI formatting */
+      word-wrap:break-word;
+      box-shadow: 0 10px 30px rgba(0,0,0,.28);
+    }
+    .msg.bot .bubble{
+      background: rgba(34,211,238,.10);
+      border-color: rgba(34,211,238,.18);
+    }
+    .msg.you .bubble{
+      background: rgba(124,58,237,.16);
+      border-color: rgba(124,58,237,.22);
+      text-align:left;
+    }
+
+    .composer{
+      display:flex; gap:10px; padding:14px;
+      border-top:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.12);
+    }
+    .input{
+      flex:1;
+      border-radius:14px;
+      border:1px solid rgba(34,211,238,.22);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      padding:12px 12px;
+      font-size:14px;
+      outline:none;
+    }
+    .input:focus{
+      box-shadow: var(--glow);
+      border-color: rgba(34,211,238,.35);
+    }
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 14px;
+      color:#06101a;
+      font-weight:700;
+      cursor:pointer;
+      background: linear-gradient(135deg, var(--cyan), #b8f7ff);
+      box-shadow: var(--glow);
+      min-width:92px;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn[disabled]{opacity:.7; cursor:not-allowed}
+
+    .side{
+      padding:16px;
+    }
+    .card{
+      padding:14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.10);
+      margin-bottom:12px;
+    }
+    .card h3{
+      margin:0 0 8px;
+      font-family:Orbitron,monospace;
+      font-size:13px;
+      letter-spacing:.4px;
+      color: rgba(255,255,255,.92);
+    }
+    .card ul{margin:0; padding-left:16px; color:var(--muted); font-size:13px}
+    .hint{
+      display:inline-block;
+      margin-top:8px;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(34,211,238,.18);
+      background: rgba(34,211,238,.08);
+      color: rgba(232,238,252,.85);
+      font-size:12px;
+    }
+
+    @media (max-width: 900px){
+      .wrap{grid-template-columns:1fr}
+      #chat{height:480px}
+    }
+  </style>
 </head>
-
 <body>
-
-  <!-- PARTICLE BACKGROUND -->
-  <canvas id="particles"></canvas>
-
-  <!-- APP CONTAINER -->
-  <div id="app">
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="brand">Astra Nexus</div>
-
-      <button id="newChatBtn" class="btn primary">
-        + New Chat
-      </button>
-
-      <div id="chatList" class="chat-list">
-        <!-- Firestore chat titles go here -->
-      </div>
-
-      <button id="logoutBtn" class="btn danger">
-        Logout
-      </button>
-    </aside>
-
-    <!-- MAIN CHAT AREA -->
-    <main class="chat-container">
-
-      <!-- CHAT MESSAGES -->
-      <section id="chatMessages" class="chat-messages">
-        <div class="system-message">
-          👋 Hello! Ask me anything — weather, code, ideas, or chat.
+  <div class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <div class="brand-title">AstraDev Nexus</div>
+          <div class="brand-sub">AI Chatbot • Portfolio Demo</div>
         </div>
-      </section>
-
-      <!-- INPUT BAR -->
-      <footer class="chat-input-bar">
-        <input
-          id="chatInput"
-          type="text"
-          placeholder="Message Astra AI..."
-          autocomplete="off"
-        />
-        <button id="sendBtn" class="send-btn">
-          ▶
-        </button>
-      </footer>
-
-    </main>
+      </a>
+      <div class="badge" id="statusBadge">Online</div>
+    </div>
   </div>
 
-  <!-- ENTRY POINT (IMPORTANT) -->
-  <script type="module" src="/static/js/main.js"></script>
+  <div class="wrap">
+    <!-- Chat panel -->
+    <section class="panel">
+      <div class="hero">
+        <div>
+          <h1>Ask anything</h1>
+          <p>ChatGPT-style replies via Groq + real-time weather/time.</p>
+        </div>
+        <div class="badge">Groq + wttr.in</div>
+      </div>
 
+      <div id="chat">
+        <div class="msg bot">
+          <div class="bubble">Namaste! Ask anything.
+Try:
+• "weather in Pune"
+• "time"
+• "Explain Flask routes"
+• "Explain my portfolio"</div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <input id="msg" class="input" placeholder='Type here… (Enter to send)' autocomplete="off" />
+        <button id="sendBtn" class="btn" onclick="sendMsg()">Send</button>
+      </div>
+    </section>
+
+    <!-- Side panel -->
+    <aside class="panel side">
+      <div class="card">
+        <h3>Quick prompts</h3>
+        <ul>
+          <li>Explain Flask routes with example</li>
+          <li>Weather in Mumbai</li>
+          <li>Time</li>
+          <li>Explain AstraDev Nexus portfolio</li>
+        </ul>
+        <span class="hint">Tip: Ask “weather in &lt;city&gt;”.</span>
+      </div>
+
+      <div class="card">
+        <h3>About</h3>
+        <ul>
+          <li>Built with Flask + Gunicorn</li>
+          <li>Deployed on Render</li>
+          <li>LLM replies via Groq when key is set</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const chatEl = document.getElementById("chat");
+    const msgEl = document.getElementById("msg");
+    const sendBtn = document.getElementById("sendBtn");
+    const statusBadge = document.getElementById("statusBadge");
+
+    function addMessage(role, text) {
+      const row = document.createElement("div");
+      row.className = "msg " + (role === "you" ? "you" : "bot");
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+
+      row.appendChild(bubble);
+      chatEl.appendChild(row);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    async function sendMsg() {
+      const msg = msgEl.value.trim();
+      if (!msg) return;
+
+      addMessage("you", msg);
+      msgEl.value = "";
+      msgEl.focus();
+
+      sendBtn.disabled = true;
+      statusBadge.textContent = "Thinking…";
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({msg})
+        });
+        const data = await res.json();
+        addMessage("bot", data.reply || "No reply.");
+      } catch (e) {
+        addMessage("bot", "Network error. Please try again.");
+      } finally {
+        sendBtn.disabled = false;
+        statusBadge.textContent = "Online";
+      }
+    }
+
+    msgEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMsg();
+    });
+  </script>
 </body>
 </html>
